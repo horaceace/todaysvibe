@@ -283,9 +283,23 @@ function makeShareImage(v) {
   return c.toDataURL('image/png');
 }
 
+// ---- Day color (before reveal, for button theming) ----
+function getDayColor() {
+  const rng = seededRandom(getDateSeed());
+  return pickFrom(COLORS, rng);
+}
+
 // ---- Init ----
 function init() {
   initParticles();
+  // Apply day's accent color to CSS so button + wash match the vibe
+  const dayColor = getDayColor();
+  document.documentElement.style.setProperty('--day-color', dayColor);
+  const dcR = parseInt(dayColor.slice(1,3),16);
+  const dcG = parseInt(dayColor.slice(3,5),16);
+  const dcB = parseInt(dayColor.slice(5,7),16);
+  document.documentElement.style.setProperty('--day-color-rgb', `${dcR},${dcG},${dcB}`);
+
   const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
   const today = new Date().toISOString().slice(0, 10);
 
