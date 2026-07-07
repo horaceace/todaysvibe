@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Vibe — Your Daily Hex</title>
+  <meta name="description" content="Reveal your daily vibe hex chart. One click.">
+  <meta property="og:title" content="Today's Vibe">
+  <meta property="og:description" content="Check your daily vibe hex.">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+
+  <div id="app">
+
+    <header class="hero">
+      <p class="hero-eyebrow">Daily Hex</p>
+      <h1 class="hero-question">what's your<br>vibe today?</h1>
+    </header>
+
+    <div class="reveal-area">
+      <button id="reveal-btn">Reveal</button>
+    </div>
+
+    <!-- Result: Fortune slip card -->
+    <div class="result" id="result">
+
+      <div class="slip-ornament slip-ornament--top"></div>
+
+      <div class="slip-emoji-wrap">
+        <div class="slip-emoji" id="slip-emoji"></div>
+      </div>
+
+      <h2 class="result-name" id="result-name"></h2>
+      <p class="result-desc" id="result-desc"></p>
+
+      <div class="bars-section" id="bars-section"></div>
+
+      <div class="result-meta" id="result-meta"></div>
+
+      <div class="slip-ornament slip-ornament--bottom"></div>
+    </div>
+
+    <div class="share-area">
+      <button id="share-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share Your Hex
+      </button>
+    </div>
+
+    <section class="history-section" id="history-section" style="display:none">
+      <h3 class="history-title">Your Recent Hexes</h3>
+      <div class="history-list" id="history-list"></div>
+    </section>
+
+    <p class="footer-text">A new hex every day. Come back tomorrow.</p>
+
+  </div>
+</body>
+</html>
