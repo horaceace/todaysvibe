@@ -11,7 +11,7 @@
 
 A lightweight, shareable daily fortune site. Each day, everyone gets the same unique vibe:
 
-- **Name** — e.g. "Cosmic Hurricane" (adjective + noun, from combinatorial pools)
+- **Name** — curated full title (e.g. "Main Character Energy"), date-seeded from a phrase pool
 - **Description** — a short mood/fate line (e.g. "You're literally the main character today")
 - **Emoji** — randomly paired (150 emoji pool)
 - **Lucky color** + **Lucky number** (1–99)
