@@ -4,7 +4,7 @@
 
 - **Stack**: Static HTML + CSS + vanilla JS (zero dependencies, no build step)
 - **Repo**: `github.com/horaceace/todaysvibe`
-- **Live**: `todaysvibe.cc` (Cloudflare Pages)
+- **Live**: `todaysvibe.today` (Cloudflare Pages)
 
 ---
 
@@ -58,10 +58,10 @@ Then re-run the deploy command.
 
 1. In Cloudflare Pages, go to your project → **Custom domains**
 2. Click **Set up a custom domain**
-3. Enter your domain (e.g., `todaysvibe.cc`)
+3. Enter your domain (e.g., `todaysvibe.today` and optionally `www.todaysvibe.today`)
 4. Cloudflare will provide DNS records. If your domain's DNS is already on Cloudflare, it's auto-configured.
 5. If DNS is elsewhere:
-   - Add a `CNAME` record pointing to `todaysvibe.pages.dev`
+   - Add a `CNAME` record for `@` or `www` pointing to `todaysvibe.pages.dev`
    - Or transfer DNS to Cloudflare for one-click setup
 6. Wait for DNS propagation (usually 1–10 minutes)
 7. SSL certificate is auto-provisioned by Cloudflare

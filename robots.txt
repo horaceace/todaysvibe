@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://todaysvibe.cc/sitemap.xml
+Sitemap: https://todaysvibe.today/sitemap.xml

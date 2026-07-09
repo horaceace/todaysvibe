@@ -432,7 +432,7 @@ function makeShareImage(v) {
 
   ctx.fillStyle = faintInk;
   ctx.font = "600 24px Syne, system-ui, sans-serif";
-  ctx.fillText("todaysvibe.cc", W / 2, H - 64);
+  ctx.fillText("todaysvibe.today", W / 2, H - 64);
 
   return c.toDataURL("image/png");
 }

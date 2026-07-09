@@ -2,7 +2,7 @@
 
 > A daily vibe check — one click, get your fortune.
 
-**Live**: [todaysvibe.pages.dev](https://todaysvibe.pages.dev)  
+**Live**: [todaysvibe.today](https://todaysvibe.today) · [pages.dev](https://todaysvibe.pages.dev)
 **Repo**: [github.com/horaceace/todaysvibe](https://github.com/horaceace/todaysvibe)
 
 ---

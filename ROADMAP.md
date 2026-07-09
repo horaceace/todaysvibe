@@ -11,18 +11,20 @@
 | 分享图 (Canvas PNG) | 已完成 | 1080×1350，与站内同构图 |
 | localStorage 持久化 | 已完成 | 当日结果 + 14 天历史（poster v1 keys） |
 | 响应式 | 已完成 | 单列 max 400px，mobile-first |
-| 部署 | 已完成 | todaysvibe.pages.dev |
+| 部署 | 已完成 | todaysvibe.today · todaysvibe.pages.dev |
 | GitHub | 已完成 | public repo，horaceace/todaysvibe |
+| 自定义域名 | 进行中 | `todaysvibe.today` |
 
 ---
 
 ## P0 — 上线必做
 
 ### 1. 自定义域名
-- 买域名（建议 `todaysvibe.lol`，$2-5/年，Namesilo/Porkbun）
-- Cloudflare Pages → Custom domains → 填入域名
-- DNS 自动配置，SSL 自动签发
-- _估时：买域名 5 分钟 + DNS 生效 10 分钟_
+- [x] 购买 `todaysvibe.today`
+- Cloudflare Pages → Custom domains → 添加 `todaysvibe.today`（可选 `www`）
+- 域名 NS 指到 Cloudflare，或 CNAME → `todaysvibe.pages.dev`
+- SSL 自动签发
+- _估时：DNS 生效 5–30 分钟_
 
 ### 2. GitHub 自动部署
 - Cloudflare Dashboard → Pages → 连接 GitHub
