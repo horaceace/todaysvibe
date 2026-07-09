@@ -1,117 +1,69 @@
 // ============================================================
-// Today's Vibe — Hex Chart with rotating backgrounds
+// Today's Vibe — Daily Poster
+// UI is the product.
 // ============================================================
 
-const STORE_KEY = 'todaysvibe_hex_v2';
-const HIST_KEY = 'todaysvibe_hex_hist_v2';
+const STORE_KEY = "todaysvibe_poster_v1";
+const HIST_KEY = "todaysvibe_poster_hist_v1";
 
 const $ = (s) => document.querySelector(s);
 
-// ---- 6 dimensions ----
 const DIMS = [
-  { key: 'energy',   label: 'Energy',   emoji: '⚡' },
-  { key: 'chaos',    label: 'Chaos',    emoji: '🌪️' },
-  { key: 'creative', label: 'Creative', emoji: '🎨' },
-  { key: 'social',   label: 'Social',   emoji: '💬' },
-  { key: 'focus',    label: 'Focus',    emoji: '🎯' },
-  { key: 'mystic',   label: 'Mystic',   emoji: '🌙' },
+  { key: "energy", label: "Energy" },
+  { key: "chaos", label: "Chaos" },
+  { key: "creative", label: "Creative" },
+  { key: "social", label: "Social" },
+  { key: "focus", label: "Focus" },
+  { key: "mystic", label: "Mystic" }
 ];
 
-// ---- 12 rotating backgrounds ----
-const BACKGROUNDS = [
-  { name: 'lavender',  css: 'linear-gradient(180deg, #f5f0ff 0%, #ede4fa 50%, #f8f5fc 100%)' },
-  { name: 'peach',     css: 'linear-gradient(180deg, #fff5f0 0%, #ffe8dd 50%, #fdf6f3 100%)' },
-  { name: 'mint',      css: 'linear-gradient(180deg, #f0faf5 0%, #ddf5e8 50%, #f5fcfa 100%)' },
-  { name: 'sky',       css: 'linear-gradient(180deg, #f0f5fd 0%, #dde8fa 50%, #f5f8fc 100%)' },
-  { name: 'rose',      css: 'linear-gradient(180deg, #fdf2f5 0%, #fce4e9 50%, #fef8f9 100%)' },
-  { name: 'vanilla',   css: 'linear-gradient(180deg, #fefcf5 0%, #faf5e6 50%, #fefdf8 100%)' },
-  { name: 'sunshine',  css: 'linear-gradient(180deg, #fffef5 0%, #fef9dd 50%, #fffef8 100%)' },
-  { name: 'sage',      css: 'linear-gradient(180deg, #f4f7f0 0%, #e8efe0 50%, #f7f9f5 100%)' },
-  { name: 'aqua',      css: 'linear-gradient(180deg, #f0f8f8 0%, #ddf0f2 50%, #f5fafa 100%)' },
-  { name: 'lilac',     css: 'linear-gradient(180deg, #f6f2fc 0%, #ece0f8 50%, #f9f6fc 100%)' },
-  { name: 'coral',     css: 'linear-gradient(180deg, #fff6f4 0%, #ffe8e2 50%, #fef9f7 100%)' },
-  { name: 'butter',    css: 'linear-gradient(180deg, #fffef7 0%, #fef9e0 50%, #fffef9 100%)' },
-];
-
-// ---- DOM ----
 const dom = {
-  revealBtn: $('#reveal-btn'),
-  result: $('#result'),
-  slipEmoji: $('#slip-emoji'),
-  resultName: $('#result-name'),
-  resultDesc: $('#result-desc'),
-  barsSection: $('#bars-section'),
-  resultMeta: $('#result-meta'),
-  shareBtn: $('#share-btn'),
-  historySection: $('#history-section'),
-  historyList: $('#history-list'),
-  particleCanvas: $('#particles'),
+  wash: $("#wash"),
+  cover: $("#cover"),
+  poster: $("#poster"),
+  coverDate: $("#cover-date"),
+  posterDate: $("#poster-date"),
+  revealBtn: $("#reveal-btn"),
+  emoji: $("#poster-emoji"),
+  name: $("#poster-name"),
+  desc: $("#poster-desc"),
+  stats: $("#stats"),
+  luckySwatch: $("#lucky-swatch"),
+  luckyNumber: $("#lucky-number"),
+  shareBtn: $("#share-btn"),
+  history: $("#history"),
+  historyList: $("#history-list")
 };
 
 let vibe = null;
-let pctx = null;
 
-// ---- Particles ----
-function initParticles() {
-  dom.particleCanvas.width = window.innerWidth;
-  dom.particleCanvas.height = window.innerHeight;
-  pctx = dom.particleCanvas.getContext('2d');
-  window.addEventListener('resize', () => {
-    dom.particleCanvas.width = window.innerWidth;
-    dom.particleCanvas.height = window.innerHeight;
-  });
+// ---- Date helpers ----
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
 }
 
-const sparks = [];
-function spawnSparks(x, y, color) {
-  for (let i = 0; i < 40; i++) {
-    const a = (Math.PI * 2 * i) / 40 + (Math.random() - 0.5) * 0.3;
-    const spd = 2.5 + Math.random() * 5;
-    sparks.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, life: 1, decay: 0.014 + Math.random() * 0.024, size: 2 + Math.random() * 3, color });
-  }
-}
-function animateSparks() {
-  if (!sparks.length) return;
-  pctx.clearRect(0, 0, dom.particleCanvas.width, dom.particleCanvas.height);
-  for (let i = sparks.length - 1; i >= 0; i--) {
-    const s = sparks[i];
-    s.x += s.vx; s.y += s.vy; s.vy += 0.025; s.life -= s.decay;
-    if (s.life <= 0) { sparks.splice(i, 1); continue; }
-    const r = parseInt(s.color.slice(1,3),16), g = parseInt(s.color.slice(3,5),16), b = parseInt(s.color.slice(5,7),16);
-    pctx.beginPath(); pctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI*2);
-    pctx.fillStyle = `rgba(${r},${g},${b},${s.life})`; pctx.fill();
-  }
-  if (sparks.length) requestAnimationFrame(animateSparks);
+function formatDateLine(d = new Date()) {
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const mm = months[d.getMonth()];
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm} · ${dd}`;
 }
 
-// ---- Dimension Bars ----
-function renderBars(scores, colorHex, animate = false) {
-  dom.barsSection.innerHTML = DIMS.map((d, i) => `
-    <div class="bar-row${animate ? '' : ' visible'}" style="--bar-width:${(scores[i]/10)*100}%;--bar-color:${colorHex}">
-      <span class="bar-label">${d.label}</span>
-      <div class="bar-track"><div class="bar-fill"></div></div>
-      <span class="bar-score">${scores[i]}</span>
-    </div>
-  `).join('');
-
-  if (animate) {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        dom.barsSection.querySelectorAll('.bar-row').forEach((row, i) => {
-          setTimeout(() => row.classList.add('visible'), i * 80);
-        });
-      });
-    });
-  }
+function formatShort(iso) {
+  const d = new Date(iso + "T12:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// ---- Vibe Gen ----
+// ---- Theme ----
+function applyLucky(color) {
+  document.documentElement.style.setProperty("--lucky", color);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#f4f1ea");
+}
+
+// ---- Generate ----
 function makeVibe() {
-  const seed = getDateSeed();
-  const rng = seededRandom(seed);
-
+  const rng = seededRandom(getDateSeed());
   const scores = DIMS.map(() => Math.floor(rng() * 10) + 1);
-  const bg = pickFrom(BACKGROUNDS, rng);
 
   return {
     name: `${pickFrom(ADJECTIVES, rng)} ${pickFrom(NOUNS, rng)}`,
@@ -120,201 +72,349 @@ function makeVibe() {
     emoji: pickFrom(EMOJIS, rng),
     number: Math.floor(rng() * 99) + 1,
     scores,
-    bg,
-    date: new Date().toISOString().slice(0, 10),
+    date: todayISO()
   };
 }
 
-// ---- Persist ----
 function loadOrCreate() {
-  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-  const today = new Date().toISOString().slice(0, 10);
+  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+  const today = todayISO();
   if (saved && saved.date === today) return saved;
 
   const v = makeVibe();
   localStorage.setItem(STORE_KEY, JSON.stringify(v));
 
-  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-  const f = hist.filter((h) => h.date !== v.date);
-  f.push({ name: v.name, emoji: v.emoji, color: v.color, date: v.date });
-  localStorage.setItem(HIST_KEY, JSON.stringify(f.slice(-14)));
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
+  const next = hist.filter((h) => h.date !== v.date);
+  next.push({ name: v.name, emoji: v.emoji, color: v.color, date: v.date });
+  localStorage.setItem(HIST_KEY, JSON.stringify(next.slice(-14)));
   return v;
 }
 
+// ---- Name sizing ----
+function nameSizeClass(name) {
+  if (name.length > 28) return "is-xlong";
+  if (name.length > 18) return "is-long";
+  return "";
+}
+
 // ---- Render ----
-function renderResult(v, animateChart = false) {
-  document.body.style.background = v.bg.css;
-  dom.result.style.setProperty('--card-accent', v.color);
-  dom.slipEmoji.textContent = v.emoji;
-  dom.resultName.textContent = v.name;
-  dom.resultName.style.color = v.color;
-  dom.resultDesc.textContent = v.desc;
-  dom.resultMeta.innerHTML = `
-    <span class="dot" style="background:${v.color}"></span>
-    <span>lucky color</span>
-    <span style="color:${v.color};font-weight:700">${v.number}</span>
-  `;
-  renderBars(v.scores, v.color, animateChart);
+function renderStats(scores, animate) {
+  dom.stats.innerHTML = DIMS.map(
+    (d, i) => `
+    <div class="stat-row" role="listitem" style="--i:${i};--w:${(scores[i] / 10) * 100}%">
+      <span class="stat-label">${d.label}</span>
+      <span class="stat-score">${scores[i]}</span>
+      <div class="stat-track"><div class="stat-fill"></div></div>
+    </div>`
+  ).join("");
+
+  const rows = dom.stats.querySelectorAll(".stat-row");
+  if (animate) {
+    requestAnimationFrame(() => {
+      rows.forEach((row) => row.classList.add("is-on"));
+    });
+  } else {
+    rows.forEach((row) => {
+      row.classList.add("is-on");
+      row.style.animation = "none";
+      row.style.opacity = "1";
+      row.style.transform = "none";
+      const fill = row.querySelector(".stat-fill");
+      if (fill) fill.style.transition = "none";
+    });
+  }
+}
+
+function renderPoster(v, animate) {
+  applyLucky(v.color);
+
+  dom.posterDate.textContent = `${formatDateLine(new Date(v.date + "T12:00:00"))} · TODAY`;
+  dom.emoji.textContent = v.emoji;
+  dom.name.textContent = v.name;
+  dom.name.className = `poster-name ${nameSizeClass(v.name)}`.trim();
+  dom.desc.textContent = v.desc;
+  dom.luckySwatch.style.background = v.color;
+  dom.luckyNumber.textContent = String(v.number).padStart(2, "0");
+
+  renderStats(v.scores, animate);
+  renderHistory();
+
+  document.title = `${v.name} — Today's Vibe`;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute("content", v.desc);
 }
 
 function renderHistory() {
-  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-  const past = hist.filter((h) => h.date !== new Date().toISOString().slice(0, 10)).reverse();
-  if (!past.length) { dom.historySection.style.display = 'none'; return; }
-  dom.historySection.style.display = 'block';
-  dom.historyList.innerHTML = past.map(v => `
-    <div class="history-row">
-      <span class="history-date">${fmtDate(v.date)}</span>
-      <span class="history-emoji">${v.emoji}</span>
-      <span class="history-name">${v.name}</span>
-    </div>`).join('');
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
+  const past = hist.filter((h) => h.date !== todayISO()).reverse();
+  if (!past.length) {
+    dom.history.hidden = true;
+    return;
+  }
+  dom.history.hidden = false;
+  dom.historyList.innerHTML = past
+    .map(
+      (h) => `
+    <li class="history-item">
+      <span class="history-date">${formatShort(h.date)}</span>
+      <span class="history-emoji">${h.emoji}</span>
+      <span class="history-name">${h.name}</span>
+    </li>`
+    )
+    .join("");
 }
 
-function fmtDate(iso) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function showPoster(animate) {
+  document.body.classList.add("is-revealed");
+  dom.cover.classList.add("hidden");
+  dom.poster.classList.remove("hidden");
+  if (animate) {
+    dom.poster.classList.remove("is-entering");
+    // restart animation
+    void dom.poster.offsetWidth;
+    dom.poster.classList.add("is-entering");
+  } else {
+    dom.poster.classList.remove("is-entering");
+  }
 }
 
 // ---- Reveal ----
 function reveal() {
+  if (vibe) return;
+
   vibe = loadOrCreate();
-  renderResult(vibe, true);
-  renderHistory();
+  dom.revealBtn.classList.add("is-leaving");
 
-  const r = dom.revealBtn.getBoundingClientRect();
-  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  if (navigator.vibrate) {
+    try {
+      navigator.vibrate(12);
+    } catch (_) {
+      /* ignore */
+    }
+  }
 
-  dom.revealBtn.classList.add('hidden');
-  requestAnimationFrame(() => {
-    dom.result.classList.add('visible');
-    dom.shareBtn.classList.add('visible');
-    dom.historySection.classList.add('visible');
-    spawnSparks(cx, cy, vibe.color);
-    animateSparks();
-  });
+  setTimeout(() => {
+    renderPoster(vibe, true);
+    showPoster(true);
+  }, 280);
 }
 
 // ---- Share ----
 function share() {
+  if (!vibe) return;
   const dataUrl = makeShareImage(vibe);
+
   if (navigator.share && navigator.canShare) {
-    fetch(dataUrl).then(r => r.blob()).then(blob => {
-      const file = new File([blob], `todaysvibe-${vibe.date}.png`, { type: 'image/png' });
-      const sd = { title: "Today's Vibe", text: `${vibe.emoji} My vibe: ${vibe.name} — ${vibe.desc}`, files: [file] };
-      if (navigator.canShare(sd)) navigator.share(sd).catch(() => download(dataUrl));
-      else download(dataUrl);
-    }).catch(() => download(dataUrl));
-  } else download(dataUrl);
+    fetch(dataUrl)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const file = new File([blob], `todaysvibe-${vibe.date}.png`, { type: "image/png" });
+        const payload = {
+          title: "Today's Vibe",
+          text: `${vibe.emoji} ${vibe.name} — ${vibe.desc}`,
+          files: [file]
+        };
+        if (navigator.canShare(payload)) {
+          return navigator.share(payload);
+        }
+        download(dataUrl);
+      })
+      .catch(() => download(dataUrl));
+  } else {
+    download(dataUrl);
+  }
 }
+
 function download(url) {
-  const a = document.createElement('a'); a.download = `todaysvibe-${vibe.date}.png`; a.href = url; a.click();
+  const a = document.createElement("a");
+  a.download = `todaysvibe-${vibe.date}.png`;
+  a.href = url;
+  a.click();
 }
 
-// ---- Share Image ----
+// ---- Share image: same poster language ----
 function makeShareImage(v) {
-  const SW = 1080, SH = 1350;
-  const c = document.createElement('canvas'); c.width = SW; c.height = SH;
-  const ctx = c.getContext('2d');
-  const hr = parseInt(v.color.slice(1,3),16), hg = parseInt(v.color.slice(3,5),16), hb = parseInt(v.color.slice(5,7),16);
-  const accent = `rgba(${hr},${hg},${hb},`;
+  const W = 1080;
+  const H = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
 
-  // BG
-  ctx.fillStyle = '#faf8fc';
-  ctx.fillRect(0, 0, SW, SH);
+  // Paper
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#f7f4ed");
+  bg.addColorStop(1, "#ebe6db");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
 
-  // Card
-  const cardX = 80, cardY = 80, cardW = SW - 160, cardH = SH - 160, cardR = 48;
-  ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, cardH, cardR);
-  ctx.fillStyle = '#fff';
-  ctx.fill();
-  ctx.strokeStyle = v.color; ctx.lineWidth = 5; ctx.stroke();
+  // Lucky wash
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  ctx.fillStyle = v.color;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
 
-  // Top ornament line
-  const topY = cardY + 70;
-  ctx.beginPath(); ctx.moveTo(cardX + 60, topY); ctx.lineTo(cardX + cardW - 60, topY);
-  ctx.strokeStyle = v.color; ctx.lineWidth = 2; ctx.globalAlpha = 0.3; ctx.stroke(); ctx.globalAlpha = 1;
+  const cx = W / 2;
+  let y = 120;
 
-  // Emoji circle
-  const emoY = 260;
-  ctx.beginPath(); ctx.arc(SW/2, emoY, 64, 0, Math.PI*2);
-  ctx.fillStyle = accent + '0.12)'; ctx.fill();
-  ctx.font = '72px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(v.emoji, SW/2, emoY + 2);
+  // Date
+  ctx.fillStyle = "#8a8378";
+  ctx.font = "600 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.textAlign = "center";
+  ctx.letterSpacing = "6px";
+  const dateStr = `${formatDateLine(new Date(v.date + "T12:00:00"))}  ·  TODAY`;
+  ctx.fillText(dateStr, cx, y);
 
-  // Name
-  ctx.font = '900 64px "Inter", sans-serif'; ctx.fillStyle = v.color; ctx.textAlign = 'center';
-  ctx.fillText(v.name, SW/2, 380);
+  y += 100;
+
+  // Emoji
+  ctx.font = "120px sans-serif";
+  ctx.fillText(v.emoji, cx, y);
+  y += 110;
+
+  // Name — adaptive size
+  let nameSize = 72;
+  if (v.name.length > 28) nameSize = 48;
+  else if (v.name.length > 18) nameSize = 58;
+  ctx.fillStyle = "#14120f";
+  ctx.font = `800 ${nameSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  wrapText(ctx, v.name, cx, y, W - 160, nameSize * 1.1, 2);
+  y += v.name.length > 18 ? nameSize * 2.2 : nameSize * 1.35;
 
   // Desc
-  ctx.font = '400 30px "Inter", sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.textAlign = 'center';
-  ctx.fillText(v.desc, SW/2, 435);
+  ctx.fillStyle = "#8a8378";
+  ctx.font = "400 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  y = wrapText(ctx, v.desc, cx, y, W - 200, 44, 3) + 48;
 
-  // Bars
-  const barStartY = 500;
-  for (let i = 0; i < 6; i++) {
-    const y = barStartY + i * 70;
-    // Label
-    ctx.font = '600 26px "Inter", sans-serif'; ctx.fillStyle = '#888'; ctx.textAlign = 'right';
-    ctx.fillText(DIMS[i].label, cardX + 160, y + 15);
-    // Track
-    ctx.beginPath();
-    ctx.roundRect(cardX + 180, y, cardW - 280, 30, 15);
-    ctx.fillStyle = '#f0ecf6'; ctx.fill();
-    // Fill
-    const fillW = (cardW - 280) * (v.scores[i] / 10);
-    ctx.beginPath();
-    ctx.roundRect(cardX + 180, y, fillW, 30, 15);
-    ctx.fillStyle = v.color; ctx.fill();
-    // Score
-    ctx.font = '700 24px "Inter", sans-serif'; ctx.fillStyle = '#555'; ctx.textAlign = 'left';
-    ctx.fillText(v.scores[i], cardX + cardW - 80, y + 15);
+  // Rule
+  ctx.strokeStyle = "#d9d3c7";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 80, y);
+  ctx.lineTo(cx + 80, y);
+  ctx.stroke();
+  y += 56;
+
+  // Stats
+  const labelX = 160;
+  const scoreX = 320;
+  const trackX = 360;
+  const trackW = W - trackX - 160;
+
+  for (let i = 0; i < DIMS.length; i++) {
+    const sy = y + i * 58;
+    ctx.fillStyle = "#8a8378";
+    ctx.font = "650 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(DIMS[i].label.toUpperCase(), labelX, sy);
+
+    ctx.fillStyle = "#14120f";
+    ctx.font = "700 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(String(v.scores[i]), scoreX, sy);
+
+    // track
+    const ty = sy - 10;
+    ctx.fillStyle = "rgba(20,18,15,0.08)";
+    roundRect(ctx, trackX, ty, trackW, 8, 4);
+    ctx.fill();
+
+    const fw = trackW * (v.scores[i] / 10);
+    if (fw > 0) {
+      ctx.fillStyle = v.color;
+      roundRect(ctx, trackX, ty, fw, 8, 4);
+      ctx.fill();
+    }
   }
 
-  // Lucky number
-  const luckyY = barStartY + 6 * 70 + 60;
-  ctx.font = '600 24px "Inter", sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.textAlign = 'center';
-  ctx.fillText(`lucky number ${v.number}  ·  todaysvibe.lol`, SW/2, luckyY);
+  y += DIMS.length * 58 + 36;
 
-  // Bottom ornament
-  const botY = cardY + cardH - 70;
-  ctx.beginPath(); ctx.moveTo(cardX + 60, botY); ctx.lineTo(cardX + cardW - 60, botY);
-  ctx.strokeStyle = v.color; ctx.lineWidth = 2; ctx.globalAlpha = 0.3; ctx.stroke(); ctx.globalAlpha = 1;
+  // Rule
+  ctx.strokeStyle = "#d9d3c7";
+  ctx.beginPath();
+  ctx.moveTo(cx - 80, y);
+  ctx.lineTo(cx + 80, y);
+  ctx.stroke();
+  y += 56;
 
-  return c.toDataURL('image/png');
+  // Lucky
+  const num = String(v.number).padStart(2, "0");
+  ctx.textAlign = "center";
+  // swatch
+  ctx.fillStyle = v.color;
+  roundRect(ctx, cx - 120, y - 18, 22, 22, 4);
+  ctx.fill();
+
+  ctx.fillStyle = "#8a8378";
+  ctx.font = "600 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.fillText(`LUCKY   ${num}`, cx + 16, y);
+
+  // Site
+  ctx.fillStyle = "#c4bdb0";
+  ctx.font = "500 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.fillText("todaysvibe.cc", cx, H - 72);
+
+  return canvas.toDataURL("image/png");
 }
 
-// ---- Day color (before reveal, for button theming) ----
-function getDayColor() {
-  const rng = seededRandom(getDateSeed());
-  return pickFrom(COLORS, rng);
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+  const words = text.split(" ");
+  let line = "";
+  let lines = 0;
+  let cy = y;
+
+  for (let n = 0; n < words.length; n++) {
+    const test = line + words[n] + " ";
+    if (ctx.measureText(test).width > maxWidth && n > 0) {
+      ctx.fillText(line.trim(), x, cy);
+      line = words[n] + " ";
+      cy += lineHeight;
+      lines++;
+      if (lines >= maxLines - 1) {
+        // last line: dump rest
+        const rest = words.slice(n).join(" ");
+        let clipped = rest;
+        while (ctx.measureText(clipped + "…").width > maxWidth && clipped.length > 1) {
+          clipped = clipped.slice(0, -1);
+        }
+        ctx.fillText(clipped.trim() + (clipped !== rest ? "…" : ""), x, cy);
+        return cy + lineHeight;
+      }
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line.trim(), x, cy);
+  return cy + lineHeight;
 }
 
 // ---- Init ----
 function init() {
-  initParticles();
-  // Apply day's accent color to CSS so button + wash match the vibe
-  const dayColor = getDayColor();
-  document.documentElement.style.setProperty('--day-color', dayColor);
-  const dcR = parseInt(dayColor.slice(1,3),16);
-  const dcG = parseInt(dayColor.slice(3,5),16);
-  const dcB = parseInt(dayColor.slice(5,7),16);
-  document.documentElement.style.setProperty('--day-color-rgb', `${dcR},${dcG},${dcB}`);
+  const dateText = formatDateLine();
+  dom.coverDate.textContent = dateText;
 
-  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-  const today = new Date().toISOString().slice(0, 10);
-
-  if (saved && saved.date === today) {
+  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+  if (saved && saved.date === todayISO()) {
     vibe = saved;
-    renderResult(vibe, false);
-    renderHistory();
-    dom.revealBtn.classList.add('hidden');
-    dom.result.classList.add('visible');
-    dom.shareBtn.classList.add('visible');
-    dom.historySection.classList.add('visible');
+    renderPoster(vibe, false);
+    showPoster(false);
   }
 
-  dom.revealBtn.addEventListener('click', reveal);
-  dom.shareBtn.addEventListener('click', share);
+  dom.revealBtn.addEventListener("click", reveal);
+  dom.shareBtn.addEventListener("click", share);
 }
 
 init();

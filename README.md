@@ -116,16 +116,16 @@ Same approach — point at repo root, no build command needed.
 
 ## Design system
 
+**Daily Poster** — UI is the product. The page is a vertical poster, not an app panel.
+
 | Element | Approach |
 |---|---|
-| Card | White card, rounded 28px, 4px colored top border (`--card-accent`) |
-| Background | 12 rotating light gradients (lavender, peach, mint, sky, rose, etc.) |
-| Accent color | Day-seeded, applied to button, wash, bars, borders, text |
-| Typography | Inter (Google Fonts), weights 400–900 |
-| Emoji display | Circular aura background with pop-in animation |
-| Dimension bars | HTML/CSS rounded bars, staggered entry animation (80ms delay each) |
-| Particles | Canvas-based sparkle burst on reveal |
-| Share card | 1080×1350 Canvas PNG, fortune-slip card layout |
+| Canvas | Warm paper field (`#f4f1ea` → `#ebe6db`), max width 400px |
+| Cover | Big type question + solid ink `Reveal` pill + date line |
+| Poster | Bare emoji, oversized name, editorial 6-stat rows, lucky stamp |
+| Accent | Day-seeded lucky color: wash, name mark, stat fills, share image |
+| Motion | Print-in only (fade + rise). No particles, no orb chrome |
+| Share image | 1080×1350 PNG matching on-page poster composition |
 
 ---
 

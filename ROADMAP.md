@@ -5,14 +5,12 @@
 | 模块 | 状态 | 备注 |
 |---|---|---|
 | 核心 vibe 生成 | 已完成 | Date-seeded PRNG + 组合词库 |
-| 运势签卡片 UI | 已完成 | 白卡 + accent 色顶边 + 装饰纹样 |
-| 六维条状图 | 已完成 | 纯 HTML/CSS，hover 变色，逐条入场动画 |
-| 12 种背景轮换 | 已完成 | 浅色渐变，每天随机选一 |
-| 动态主题色 | 已完成 | 按钮/光晕/边框均跟随每日幸运色 |
-| 分享卡片 (Canvas PNG) | 已完成 | 1080×1350，运势签卡片布局 |
-| 粒子特效 | 已完成 | 点击按钮时爆发 sparkle |
-| localStorage 持久化 | 已完成 | 当日结果 + 14 天历史 |
-| 响应式适配 | 已完成 | 400px / 768px 断点 |
+| **Daily Poster UI** | 已完成 | 纸色封面 → 大字海报；UI 即产品 |
+| 编辑式六维 | 已完成 | 细轨 + 错列入场，非仪表盘 |
+| 幸运色 wash | 已完成 | 揭晓后渗入全页 + 分享图 |
+| 分享图 (Canvas PNG) | 已完成 | 1080×1350，与站内同构图 |
+| localStorage 持久化 | 已完成 | 当日结果 + 14 天历史（poster v1 keys） |
+| 响应式 | 已完成 | 单列 max 400px，mobile-first |
 | 部署 | 已完成 | todaysvibe.pages.dev |
 | GitHub | 已完成 | public repo，horaceace/todaysvibe |
 
