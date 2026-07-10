@@ -312,58 +312,76 @@ body.is-dropped {
   max-width: 28ch;
 }
 
-/* Stats — editorial 2×3 number tiles (poster, not dashboard bars) */
-.scoreboard--grid {
+/* Stats form E — Peak + Soft only (narrative pair, not full KPI board) */
+.scoreboard--pair {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin: 8px 0 28px;
 }
 
-.stat-cell {
+.stat-pair {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding: 14px 12px 12px;
+  gap: 2px;
+  padding: 16px 14px 14px;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.14);
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
 }
 
-.stat-cell.is-on {
-  animation: cell-in 0.5s var(--ease) forwards;
-  animation-delay: calc(var(--i, 0) * 45ms + 80ms);
+.stat-pair.is-on {
+  animation: cell-in 0.55s var(--ease) forwards;
+  animation-delay: calc(var(--i, 0) * 70ms + 90ms);
 }
 
-.stat-cell.is-peak {
-  border-color: rgba(242, 239, 232, 0.38);
-  background: rgba(242, 239, 232, 0.1);
+.stat-pair--peak {
+  border-color: rgba(242, 239, 232, 0.4);
+  background: rgba(242, 239, 232, 0.12);
 }
 
-.stat-cell.is-soft {
-  border-color: rgba(242, 239, 232, 0.1);
-  background: rgba(0, 0, 0, 0.18);
+.stat-pair--soft {
+  border-color: rgba(242, 239, 232, 0.12);
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.stat-cell__n {
+.stat-pair__tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 6px;
+}
+
+.stat-pair__n {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.6rem, 6vw, 2rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-size: clamp(2.4rem, 10vw, 3.1rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
   color: var(--fg);
   font-variant-numeric: tabular-nums;
 }
 
-.stat-cell__label {
-  font-size: 0.62rem;
+.stat-pair__label {
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-top: 4px;
+}
+
+.stat-pair__hint {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fg-faint);
+  margin-top: 4px;
 }
 
 @keyframes cell-in {

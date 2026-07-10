@@ -263,21 +263,37 @@ function loadOrCreate() {
   return v;
 }
 
-function renderScoreboard(scores, animate) {
-  // Editorial 2×3 number grid — poster tiles, not dashboard bars
-  const max = Math.max(...scores);
-  const min = Math.min(...scores);
-  dom.scoreboard.innerHTML = DIMS.map((d, i) => {
-    const s = scores[i];
-    const tone = s === max ? "is-peak" : s === min ? "is-soft" : "";
-    return `
-    <div class="stat-cell ${tone}" role="listitem" style="--i:${i}">
-      <span class="stat-cell__n">${s}</span>
-      <span class="stat-cell__label">${d.label}</span>
-    </div>`;
-  }).join("");
+function peakSoft(scores) {
+  let peakI = 0;
+  let softI = 0;
+  for (let i = 1; i < scores.length; i++) {
+    if (scores[i] > scores[peakI]) peakI = i;
+    if (scores[i] < scores[softI]) softI = i;
+  }
+  // If all equal (shouldn't after makeScores), soft falls on next dim
+  if (peakI === softI && scores.length > 1) softI = (peakI + 1) % scores.length;
+  return { peakI, softI };
+}
 
-  const cells = dom.scoreboard.querySelectorAll(".stat-cell");
+function renderScoreboard(scores, animate) {
+  // Form E: narrative Peak + Soft only — not a full KPI board
+  const { peakI, softI } = peakSoft(scores);
+  dom.scoreboard.className = "scoreboard scoreboard--pair";
+  dom.scoreboard.innerHTML = `
+    <div class="stat-pair stat-pair--peak" role="listitem" style="--i:0">
+      <span class="stat-pair__tag">Peak</span>
+      <span class="stat-pair__n">${scores[peakI]}</span>
+      <span class="stat-pair__label">${DIMS[peakI].label}</span>
+      <span class="stat-pair__hint">running hot today</span>
+    </div>
+    <div class="stat-pair stat-pair--soft" role="listitem" style="--i:1">
+      <span class="stat-pair__tag">Soft</span>
+      <span class="stat-pair__n">${scores[softI]}</span>
+      <span class="stat-pair__label">${DIMS[softI].label}</span>
+      <span class="stat-pair__hint">go easy here</span>
+    </div>`;
+
+  const cells = dom.scoreboard.querySelectorAll(".stat-pair");
   if (animate) {
     requestAnimationFrame(() => cells.forEach((r) => r.classList.add("is-on")));
   } else {
