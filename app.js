@@ -283,13 +283,11 @@ function renderScoreboard(scores, animate) {
   dom.scoreboard.innerHTML = `
     <div class="stat-pair stat-pair--peak" role="listitem" style="--i:0">
       <span class="stat-pair__tag">Peak</span>
-      <span class="stat-pair__n">${scores[peakI]}</span>
       <span class="stat-pair__label">${DIMS[peakI].label}</span>
       <span class="stat-pair__hint">running hot today</span>
     </div>
     <div class="stat-pair stat-pair--soft" role="listitem" style="--i:1">
       <span class="stat-pair__tag">Soft</span>
-      <span class="stat-pair__n">${scores[softI]}</span>
       <span class="stat-pair__label">${DIMS[softI].label}</span>
       <span class="stat-pair__hint">go easy here</span>
     </div>`;
@@ -465,10 +463,9 @@ function share() {
   }
 }
 
-async function copyShareText() {
+async function copyShareText(fromEl) {
   if (!vibe) return;
   const text = vibeShareText(vibe);
-  const btn = dom.copyBtn;
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(text);
@@ -483,21 +480,25 @@ async function copyShareText() {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
-    if (btn) {
-      const prev = btn.textContent;
-      btn.textContent = "Copied";
-      btn.classList.add("is-copied");
-      setTimeout(() => {
-        btn.textContent = prev;
-        btn.classList.remove("is-copied");
-      }, 1400);
+    document.querySelectorAll(".copyable.is-copied").forEach((el) => el.classList.remove("is-copied"));
+    if (fromEl) fromEl.classList.add("is-copied");
+    if (dom.copyHint) {
+      dom.copyHint.textContent = "Copied";
+      dom.copyHint.classList.add("is-on");
     }
+    setTimeout(() => {
+      if (fromEl) fromEl.classList.remove("is-copied");
+      if (dom.copyHint) {
+        dom.copyHint.textContent = "Tap text to copy";
+        dom.copyHint.classList.remove("is-on");
+      }
+    }, 1400);
   } catch (err) {
     console.warn("[todaysvibe] copy failed", err);
-    if (btn) {
-      btn.textContent = "Copy failed";
+    if (dom.copyHint) {
+      dom.copyHint.textContent = "Copy failed";
       setTimeout(() => {
-        btn.textContent = "Copy text";
+        dom.copyHint.textContent = "Tap text to copy";
       }, 1400);
     }
   }
@@ -675,10 +676,18 @@ function bindClicks() {
     } else if (t.closest("#share-btn")) {
       e.preventDefault();
       share();
-    } else if (t.closest("#copy-btn")) {
+    } else if (t.closest(".copyable")) {
       e.preventDefault();
-      copyShareText();
+      copyShareText(t.closest(".copyable"));
     }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const t = e.target;
+    if (!(t instanceof Element) || !t.closest(".copyable")) return;
+    e.preventDefault();
+    copyShareText(t.closest(".copyable"));
   });
 }
 

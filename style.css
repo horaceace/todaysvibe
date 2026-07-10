@@ -386,25 +386,16 @@ body.is-dropped {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--fg-faint);
-  margin-bottom: 6px;
-}
-
-.stat-pair__n {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(2.4rem, 10vw, 3.1rem);
-  line-height: 0.95;
-  letter-spacing: -0.05em;
-  color: var(--fg);
-  font-variant-numeric: tabular-nums;
+  margin-bottom: 10px;
 }
 
 .stat-pair__label {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   color: var(--fg);
-  margin-top: 4px;
 }
 
 .stat-pair__hint {
@@ -413,7 +404,7 @@ body.is-dropped {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fg-faint);
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 @keyframes cell-in {
@@ -423,19 +414,21 @@ body.is-dropped {
 /* Do / Don't oracle */
 .oracle {
   display: grid;
-  gap: 12px;
+  gap: 18px;
   margin: 0 0 32px;
   padding: 4px 0 0;
 }
 
 .oracle-row {
   display: grid;
-  grid-template-columns: 52px 1fr;
-  gap: 12px;
-  align-items: baseline;
+  grid-template-columns: 4.25rem 1fr;
+  column-gap: 1.1rem;
+  row-gap: 0.35rem;
+  align-items: start;
 }
 
 .oracle-k {
+  padding-top: 0.2em;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -447,8 +440,9 @@ body.is-dropped {
   font-family: var(--font-serif);
   font-size: clamp(1rem, 3.6vw, 1.15rem);
   font-style: italic;
-  line-height: 1.35;
+  line-height: 1.45;
   color: var(--fg-soft);
+  max-width: 28ch;
 }
 
 /* Stamp */
@@ -501,12 +495,6 @@ body.is-dropped {
   padding-top: 8px;
 }
 
-.share-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
 /* Same solid block language as cover "Drop today" */
 .share-btn {
   appearance: none;
@@ -524,16 +512,6 @@ body.is-dropped {
   cursor: pointer;
   transition: transform 0.2s var(--ease), opacity 0.2s ease;
   -webkit-tap-highlight-color: transparent;
-}
-
-.share-btn--ghost {
-  background: transparent;
-  color: var(--fg);
-  border: 1.5px solid rgba(242, 239, 232, 0.35);
-}
-
-.share-btn.is-copied {
-  opacity: 0.85;
 }
 
 .share-btn:hover { transform: scale(1.015); }
