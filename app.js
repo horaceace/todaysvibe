@@ -3,9 +3,9 @@
 // Full-bleed daily color. UI is the product.
 // ============================================================
 
-// v3: per-visitor seed (not global daily same vibe)
-const STORE_KEY = "todaysvibe_drop_v3";
-const HIST_KEY = "todaysvibe_drop_hist_v3";
+// v4: shaped scores + do/don't oracle lines
+const STORE_KEY = "todaysvibe_drop_v4";
+const HIST_KEY = "todaysvibe_drop_hist_v4";
 const USER_KEY = "todaysvibe_uid_v1";
 
 const $ = (s) => document.querySelector(s);
@@ -33,9 +33,15 @@ const dom = {
   number: $("#drop-number"),
   hex: $("#drop-hex"),
   shareBtn: $("#share-btn"),
+  copyBtn: $("#copy-btn"),
+  dropDo: $("#drop-do"),
+  dropDont: $("#drop-dont"),
+  countdown: $("#countdown"),
   history: $("#history"),
   themeMeta: $("#theme-meta")
 };
+
+let countdownTimer = null;
 
 let vibe = null;
 
@@ -81,9 +87,47 @@ function isValidVibe(v) {
     typeof v.emoji === "string" &&
     typeof v.number === "number" &&
     typeof v.date === "string" &&
+    typeof v.do === "string" &&
+    typeof v.dont === "string" &&
     Array.isArray(v.scores) &&
     v.scores.length === DIMS.length
   );
+}
+
+/**
+ * Playful stats with shape: one peak, one soft spot, few maxed scores.
+ * Avoids "everything is 10" KPI cosplay.
+ */
+function makeScores(rng) {
+  const n = DIMS.length;
+  const scores = Array.from({ length: n }, () => 3 + Math.floor(rng() * 6)); // 3–8 mid bias
+  const peak = Math.floor(rng() * n);
+  let low = Math.floor(rng() * (n - 1));
+  if (low >= peak) low += 1;
+  scores[peak] = 8 + Math.floor(rng() * 3); // 8–10
+  scores[low] = 1 + Math.floor(rng() * 4); // 1–4
+  // At most two scores ≥ 9
+  let highCount = scores.filter((s) => s >= 9).length;
+  for (let i = 0; i < n && highCount > 2; i++) {
+    if (i !== peak && scores[i] >= 9) {
+      scores[i] = 5 + Math.floor(rng() * 3);
+      highCount--;
+    }
+  }
+  return scores;
+}
+
+function vibeShareText(v) {
+  const scoreLine = DIMS.map((d, i) => `${d.label} ${v.scores[i]}`).join(" · ");
+  return [
+    `${v.emoji} ${v.name}`,
+    v.desc,
+    `Do: ${v.do}`,
+    `Don't: ${v.dont}`,
+    scoreLine,
+    `${v.color.toUpperCase()} · No.${String(v.number).padStart(2, "0")}`,
+    "todaysvibe.today"
+  ].join("\n");
 }
 
 function formatDate(d = new Date()) {
@@ -156,16 +200,48 @@ function nameClass(name) {
   return "";
 }
 
+/** Stable anonymous id for this browser — different visitors → different vibes */
+function getUserId() {
+  try {
+    let id = localStorage.getItem(USER_KEY);
+    if (id && id.length >= 8) return id;
+    id =
+      (typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID()) ||
+      `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(USER_KEY, id);
+    return id;
+  } catch {
+    // private mode fallback: session-only noise (still personal, not shared)
+    return `tmp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+}
+
+/** Mix calendar day + user id → unique daily seed per person */
+function getVibeSeed() {
+  const day = getDateSeed();
+  const uid = getUserId();
+  // FNV-1a style mix so small uid diffs avalanche
+  let h = 2166136261 >>> 0;
+  const s = `${day}:${uid}`;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
 function makeVibe() {
-  const rng = seededRandom(getDateSeed());
-  // Full curated title (intentional phrase) — not adjective+noun mash
+  // Per person, per day — different people different vibes
+  const rng = seededRandom(getVibeSeed());
   return {
     name: pickFrom(VIBE_TITLES, rng),
     desc: pickFrom(DESCRIPTIONS, rng),
     color: pickFrom(COLORS, rng),
     emoji: pickFrom(EMOJIS, rng),
     number: Math.floor(rng() * 99) + 1,
-    scores: DIMS.map(() => Math.floor(rng() * 10) + 1),
+    scores: makeScores(rng),
+    do: pickFrom(DO_LIST, rng),
+    dont: pickFrom(DONT_LIST, rng),
     date: todayISO()
   };
 }
@@ -188,29 +264,55 @@ function loadOrCreate() {
 }
 
 function renderScoreboard(scores, animate) {
-  // Same vertical stack language as the cover — not a widget grid
-  dom.scoreboard.innerHTML = DIMS.map(
-    (d, i) => `
-    <div class="stat-line" role="listitem" style="--i:${i}">
-      <span class="stat-line__label">${d.label}</span>
-      <span class="stat-line__track" aria-hidden="true"><span class="stat-line__fill" style="--w:${(scores[i] / 10) * 100}%"></span></span>
-      <span class="stat-line__n">${scores[i]}</span>
-    </div>`
-  ).join("");
+  // Editorial 2×3 number grid — poster tiles, not dashboard bars
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  dom.scoreboard.innerHTML = DIMS.map((d, i) => {
+    const s = scores[i];
+    const tone = s === max ? "is-peak" : s === min ? "is-soft" : "";
+    return `
+    <div class="stat-cell ${tone}" role="listitem" style="--i:${i}">
+      <span class="stat-cell__n">${s}</span>
+      <span class="stat-cell__label">${d.label}</span>
+    </div>`;
+  }).join("");
 
-  const rows = dom.scoreboard.querySelectorAll(".stat-line");
+  const cells = dom.scoreboard.querySelectorAll(".stat-cell");
   if (animate) {
-    requestAnimationFrame(() => rows.forEach((r) => r.classList.add("is-on")));
+    requestAnimationFrame(() => cells.forEach((r) => r.classList.add("is-on")));
   } else {
-    rows.forEach((r) => {
+    cells.forEach((r) => {
       r.classList.add("is-on");
       r.style.animation = "none";
       r.style.opacity = "1";
       r.style.transform = "none";
-      const fill = r.querySelector(".stat-line__fill");
-      if (fill) fill.style.transition = "none";
     });
   }
+}
+
+function msUntilNextLocalMidnight() {
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(24, 0, 0, 0);
+  return next.getTime() - now.getTime();
+}
+
+function formatCountdown(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = String(Math.floor(total / 3600)).padStart(2, "0");
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+function startCountdown() {
+  if (!dom.countdown) return;
+  const tick = () => {
+    dom.countdown.textContent = formatCountdown(msUntilNextLocalMidnight());
+  };
+  tick();
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(tick, 1000);
 }
 
 function renderHistory() {
@@ -250,8 +352,12 @@ function renderDrop(v, animate) {
   dom.hex.style.background = v.color;
   dom.hex.style.color = isLightColor(v.color) ? "#0a0a0a" : "#f2efe8";
 
+  if (dom.dropDo) dom.dropDo.textContent = v.do || "";
+  if (dom.dropDont) dom.dropDont.textContent = v.dont || "";
+
   renderScoreboard(v.scores, animate);
   renderHistory();
+  startCountdown();
 
   document.title = `${v.name} — Today's Vibe`;
   const meta = document.querySelector('meta[name="description"]');
@@ -321,6 +427,7 @@ function reveal(ev) {
 function share() {
   if (!vibe) return;
   const dataUrl = makeShareImage(vibe);
+  const text = vibeShareText(vibe);
 
   if (navigator.share && navigator.canShare) {
     fetch(dataUrl)
@@ -329,7 +436,7 @@ function share() {
         const file = new File([blob], `todaysvibe-${vibe.date}.png`, { type: "image/png" });
         const payload = {
           title: "Today's Vibe",
-          text: `${vibe.emoji} ${vibe.name} — ${vibe.color}`,
+          text,
           files: [file]
         };
         if (navigator.canShare(payload)) return navigator.share(payload);
@@ -338,6 +445,44 @@ function share() {
       .catch(() => download(dataUrl));
   } else {
     download(dataUrl);
+  }
+}
+
+async function copyShareText() {
+  if (!vibe) return;
+  const text = vibeShareText(vibe);
+  const btn = dom.copyBtn;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    if (btn) {
+      const prev = btn.textContent;
+      btn.textContent = "Copied";
+      btn.classList.add("is-copied");
+      setTimeout(() => {
+        btn.textContent = prev;
+        btn.classList.remove("is-copied");
+      }, 1400);
+    }
+  } catch (err) {
+    console.warn("[todaysvibe] copy failed", err);
+    if (btn) {
+      btn.textContent = "Copy failed";
+      setTimeout(() => {
+        btn.textContent = "Copy text";
+      }, 1400);
+    }
   }
 }
 
@@ -394,28 +539,48 @@ function makeShareImage(v) {
   ctx.font = `italic 400 38px "Instrument Serif", Georgia, serif`;
   y = wrapLeft(ctx, v.desc, pad, y, W - pad * 2, 50, 3);
 
-  y += 48;
-  // vertical stats (match on-page)
+  y += 36;
+  // 2×3 stat tiles (match on-page grid)
+  const gap = 16;
+  const cellW = (W - pad * 2 - gap * 2) / 3;
+  const cellH = 110;
   for (let i = 0; i < 6; i++) {
-    const sy = y + i * 52;
-    ctx.fillStyle = faintInk;
-    ctx.font = "700 22px Syne, system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(DIMS[i].label.toUpperCase(), pad, sy);
-
-    const trackX = pad + 200;
-    const trackW = W - pad - trackX - 70;
-    ctx.fillStyle = "rgba(242,239,232,0.14)";
-    ctx.fillRect(trackX, sy - 12, trackW, 6);
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const cx = pad + col * (cellW + gap);
+    const cy = y + row * (cellH + gap);
+    ctx.fillStyle = "rgba(242,239,232,0.08)";
+    ctx.fillRect(cx, cy, cellW, cellH);
     ctx.fillStyle = ink;
-    ctx.fillRect(trackX, sy - 12, trackW * (v.scores[i] / 10), 6);
-
-    ctx.textAlign = "right";
-    ctx.font = "800 28px Syne, system-ui, sans-serif";
-    ctx.fillText(String(v.scores[i]), W - pad, sy);
+    ctx.font = "800 48px Syne, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(String(v.scores[i]), cx + 20, cy + 58);
+    ctx.fillStyle = faintInk;
+    ctx.font = "700 20px Syne, system-ui, sans-serif";
+    ctx.fillText(DIMS[i].label.toUpperCase(), cx + 20, cy + 88);
   }
 
-  y += 6 * 52 + 48;
+  y += 2 * (cellH + gap) + 28;
+  if (v.do) {
+    ctx.fillStyle = faintInk;
+    ctx.font = "700 20px Syne, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("DO", pad, y);
+    ctx.fillStyle = softInk;
+    ctx.font = `italic 400 28px "Instrument Serif", Georgia, serif`;
+    y = wrapLeft(ctx, v.do, pad + 90, y, W - pad * 2 - 90, 36, 2);
+    y += 12;
+  }
+  if (v.dont) {
+    ctx.fillStyle = faintInk;
+    ctx.font = "700 20px Syne, system-ui, sans-serif";
+    ctx.fillText("DON'T", pad, y);
+    ctx.fillStyle = softInk;
+    ctx.font = `italic 400 28px "Instrument Serif", Georgia, serif`;
+    y = wrapLeft(ctx, v.dont, pad + 110, y, W - pad * 2 - 110, 36, 2);
+    y += 20;
+  }
+
   ctx.textAlign = "left";
   ctx.fillStyle = faintInk;
   ctx.font = "700 22px Syne, system-ui, sans-serif";
@@ -488,6 +653,9 @@ function bindClicks() {
     } else if (t.closest("#share-btn")) {
       e.preventDefault();
       share();
+    } else if (t.closest("#copy-btn")) {
+      e.preventDefault();
+      copyShareText();
     }
   });
 }

@@ -24,9 +24,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=7">
-  <script src="data.js?v=7" defer></script>
-  <script src="app.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=8">
+  <script src="data.js?v=8" defer></script>
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
   <!-- Full-bleed stage color (black → lucky) -->
@@ -70,7 +70,19 @@
         <p class="drop-desc" id="drop-desc"></p>
       </div>
 
-      <div class="scoreboard" id="scoreboard" role="list"></div>
+      <!-- Editorial 2×3 number grid (not dashboard bars) -->
+      <div class="scoreboard scoreboard--grid" id="scoreboard" role="list"></div>
+
+      <div class="oracle" id="oracle">
+        <div class="oracle-row">
+          <span class="oracle-k">Do</span>
+          <span class="oracle-v" id="drop-do"></span>
+        </div>
+        <div class="oracle-row">
+          <span class="oracle-k">Don’t</span>
+          <span class="oracle-v" id="drop-dont"></span>
+        </div>
+      </div>
 
       <div class="drop-stamp">
         <span class="drop-stamp__label">No.</span>
@@ -79,9 +91,12 @@
       </div>
 
       <footer class="drop-foot">
-        <button type="button" id="share-btn" class="share-btn">Share this drop</button>
+        <div class="share-row">
+          <button type="button" id="share-btn" class="share-btn">Share image</button>
+          <button type="button" id="copy-btn" class="share-btn share-btn--ghost">Copy text</button>
+        </div>
         <ul class="history" id="history" hidden></ul>
-        <p class="drop-next">Next drop tomorrow</p>
+        <p class="drop-next" id="drop-next">Next drop in <span id="countdown">--:--:--</span></p>
       </footer>
     </section>
 
