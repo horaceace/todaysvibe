@@ -37,7 +37,7 @@ Uses the [mulberry32](https://gist.github.com/tommyettinger/46a87453324488318914
 | Colors | 100 | Tailwind-inspired hex palette |
 | Emojis | 150 | 🔮 🌊 ⚡ 🎭 🌙 🔥 |
 | Numbers | 99 | 1–99 |
-| **Total combinations** | **~15.6 trillion** | |
+| **Total combinations** | **~5.5×10¹⁶** | curated titles × desc × color × emoji × number × 6 scores |
 
 ### Persistence
 

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+# Prefer apex; www should 301 to apex in Cloudflare
 Sitemap: https://todaysvibe.today/sitemap.xml

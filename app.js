@@ -123,7 +123,7 @@ function vibeShareText(v) {
   return [
     `${v.emoji} ${v.name}`,
     v.desc,
-    `Peak: ${DIMS[peakI].label} ${v.scores[peakI]} · Soft: ${DIMS[softI].label} ${v.scores[softI]}`,
+    `Peak: ${DIMS[peakI].label} · Soft: ${DIMS[softI].label}`,
     `Do: ${v.do}`,
     `Don't: ${v.dont}`,
     `${v.color.toUpperCase()} · No.${String(v.number).padStart(2, "0")}`,
@@ -574,13 +574,13 @@ function makeShareImage(v) {
     ctx.fillStyle = faintInk;
     ctx.font = "700 20px Syne, system-ui, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(p.tag, cx + 24, y + 36);
+    ctx.fillText(p.tag, cx + 24, y + 42);
     ctx.fillStyle = ink;
-    ctx.font = "800 72px Syne, system-ui, sans-serif";
-    ctx.fillText(String(v.scores[p.i]), cx + 24, y + 100);
-    ctx.fillStyle = softInk;
-    ctx.font = "700 26px Syne, system-ui, sans-serif";
-    ctx.fillText(DIMS[p.i].label.toUpperCase(), cx + 24, y + 136);
+    ctx.font = "800 40px Syne, system-ui, sans-serif";
+    ctx.fillText(DIMS[p.i].label.toUpperCase(), cx + 24, y + 98);
+    ctx.fillStyle = faintInk;
+    ctx.font = "600 18px Syne, system-ui, sans-serif";
+    ctx.fillText(p.hint, cx + 24, y + 132);
   });
 
   y += pairH + 36;
