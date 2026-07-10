@@ -3,8 +3,10 @@
 // Full-bleed daily color. UI is the product.
 // ============================================================
 
-const STORE_KEY = "todaysvibe_drop_v2";
-const HIST_KEY = "todaysvibe_drop_hist_v2";
+// v3: per-visitor seed (not global daily same vibe)
+const STORE_KEY = "todaysvibe_drop_v3";
+const HIST_KEY = "todaysvibe_drop_hist_v3";
+const USER_KEY = "todaysvibe_uid_v1";
 
 const $ = (s) => document.querySelector(s);
 

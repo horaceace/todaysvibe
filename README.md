@@ -25,7 +25,7 @@ All generated deterministically from the date. No login. No server. No database.
 
 ### PRNG (pseudorandom number generator)
 
-Uses the [mulberry32](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c) algorithm seeded with today's date string (`YYYY-MM-DD`). Same date = same seed = same vibe for everyone.
+Uses the [mulberry32](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c) algorithm. Seed = hash of **local calendar day + anonymous browser id** (`localStorage`). Same person + same day = same vibe; different people get different vibes.
 
 ### Combinatorial data pool
 
