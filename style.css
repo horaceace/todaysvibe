@@ -312,6 +312,38 @@ body.is-dropped {
   max-width: 28ch;
 }
 
+.copyable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 2px;
+  transition: opacity 0.2s ease;
+}
+
+.copyable:focus-visible {
+  outline: 2px solid rgba(242, 239, 232, 0.45);
+  outline-offset: 6px;
+}
+
+.copyable.is-copied {
+  opacity: 0.82;
+}
+
+.copy-hint {
+  margin-top: 12px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  opacity: 0.7;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.copy-hint.is-on {
+  opacity: 1;
+  color: var(--fg-soft);
+}
+
 /* Stats form E — Peak + Soft only (narrative pair, not full KPI board) */
 .scoreboard--pair {
   width: 100%;
@@ -563,8 +595,8 @@ body.is-dropped {
 }
 
 @media (max-width: 360px) {
-  .scoreboard--grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .scoreboard--pair {
+    grid-template-columns: 1fr;
   }
 }
 

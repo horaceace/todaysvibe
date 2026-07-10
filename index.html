@@ -24,9 +24,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=8">
-  <script src="data.js?v=8" defer></script>
-  <script src="app.js?v=8" defer></script>
+  <link rel="stylesheet" href="style.css?v=9">
+  <script src="data.js?v=9" defer></script>
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
   <!-- Full-bleed stage color (black → lucky) -->
@@ -64,16 +64,17 @@
         <p class="drop-brand">Today’s Vibe</p>
       </header>
 
-      <div class="drop-hero">
+      <div class="drop-hero copyable" id="drop-hero" role="button" tabindex="0" title="Tap to copy" aria-label="Copy today's vibe as text">
         <span class="drop-emoji" id="drop-emoji"></span>
         <h2 class="drop-name" id="drop-name"></h2>
         <p class="drop-desc" id="drop-desc"></p>
+        <p class="copy-hint" id="copy-hint" aria-live="polite">Tap text to copy</p>
       </div>
 
       <!-- Form E: Peak + Soft only -->
       <div class="scoreboard scoreboard--pair" id="scoreboard" role="list"></div>
 
-      <div class="oracle" id="oracle">
+      <div class="oracle copyable" id="oracle" role="button" tabindex="0" title="Tap to copy" aria-label="Copy do and don't">
         <div class="oracle-row">
           <span class="oracle-k">Do</span>
           <span class="oracle-v" id="drop-do"></span>
@@ -91,10 +92,7 @@
       </div>
 
       <footer class="drop-foot">
-        <div class="share-row">
-          <button type="button" id="share-btn" class="share-btn">Share image</button>
-          <button type="button" id="copy-btn" class="share-btn share-btn--ghost">Copy text</button>
-        </div>
+        <button type="button" id="share-btn" class="share-btn">Share image</button>
         <ul class="history" id="history" hidden></ul>
         <p class="drop-next" id="drop-next">Next drop in <span id="countdown">--:--:--</span></p>
       </footer>

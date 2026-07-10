@@ -33,9 +33,10 @@ const dom = {
   number: $("#drop-number"),
   hex: $("#drop-hex"),
   shareBtn: $("#share-btn"),
-  copyBtn: $("#copy-btn"),
+  dropHero: $("#drop-hero"),
   dropDo: $("#drop-do"),
   dropDont: $("#drop-dont"),
+  copyHint: $("#copy-hint"),
   countdown: $("#countdown"),
   history: $("#history"),
   themeMeta: $("#theme-meta")
@@ -118,13 +119,13 @@ function makeScores(rng) {
 }
 
 function vibeShareText(v) {
-  const scoreLine = DIMS.map((d, i) => `${d.label} ${v.scores[i]}`).join(" · ");
+  const { peakI, softI } = peakSoft(v.scores);
   return [
     `${v.emoji} ${v.name}`,
     v.desc,
+    `Peak: ${DIMS[peakI].label} ${v.scores[peakI]} · Soft: ${DIMS[softI].label} ${v.scores[softI]}`,
     `Do: ${v.do}`,
     `Don't: ${v.dont}`,
-    scoreLine,
     `${v.color.toUpperCase()} · No.${String(v.number).padStart(2, "0")}`,
     "todaysvibe.today"
   ].join("\n");
@@ -556,27 +557,32 @@ function makeShareImage(v) {
   y = wrapLeft(ctx, v.desc, pad, y, W - pad * 2, 50, 3);
 
   y += 36;
-  // 2×3 stat tiles (match on-page grid)
-  const gap = 16;
-  const cellW = (W - pad * 2 - gap * 2) / 3;
-  const cellH = 110;
-  for (let i = 0; i < 6; i++) {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    const cx = pad + col * (cellW + gap);
-    const cy = y + row * (cellH + gap);
+  // Peak + Soft pair (form E)
+  const { peakI, softI } = peakSoft(v.scores);
+  const pairGap = 20;
+  const pairW = (W - pad * 2 - pairGap) / 2;
+  const pairH = 160;
+  const pairs = [
+    { tag: "PEAK", i: peakI, hint: "RUNNING HOT" },
+    { tag: "SOFT", i: softI, hint: "GO EASY" }
+  ];
+  pairs.forEach((p, idx) => {
+    const cx = pad + idx * (pairW + pairGap);
     ctx.fillStyle = "rgba(242,239,232,0.08)";
-    ctx.fillRect(cx, cy, cellW, cellH);
-    ctx.fillStyle = ink;
-    ctx.font = "800 48px Syne, system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(String(v.scores[i]), cx + 20, cy + 58);
+    ctx.fillRect(cx, y, pairW, pairH);
     ctx.fillStyle = faintInk;
     ctx.font = "700 20px Syne, system-ui, sans-serif";
-    ctx.fillText(DIMS[i].label.toUpperCase(), cx + 20, cy + 88);
-  }
+    ctx.textAlign = "left";
+    ctx.fillText(p.tag, cx + 24, y + 36);
+    ctx.fillStyle = ink;
+    ctx.font = "800 72px Syne, system-ui, sans-serif";
+    ctx.fillText(String(v.scores[p.i]), cx + 24, y + 100);
+    ctx.fillStyle = softInk;
+    ctx.font = "700 26px Syne, system-ui, sans-serif";
+    ctx.fillText(DIMS[p.i].label.toUpperCase(), cx + 24, y + 136);
+  });
 
-  y += 2 * (cellH + gap) + 28;
+  y += pairH + 36;
   if (v.do) {
     ctx.fillStyle = faintInk;
     ctx.font = "700 20px Syne, system-ui, sans-serif";
